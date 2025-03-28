@@ -103,6 +103,7 @@ def get_stream_urls_from_tmdb(video_url: str, max_retries: int = 2) -> list:
 
     def fetch_streams(iframe_url):
         options = webdriver.ChromeOptions()
+        options.binary_location = "/app/.apt/usr/bin/google-chrome"
         options.add_argument("--headless")
         options.add_argument("--no-sandbox")  # Bypass OS security model
         options.add_argument("--disable-dev-shm-usage")  # Overcome limited resource issues
