@@ -10,6 +10,7 @@ import os
 from urllib.parse import urlparse, parse_qs, urlunparse
 import random
 from pymongo import MongoClient
+import chromedriver_autoinstaller
 
 app = Flask(__name__)
 
@@ -104,6 +105,10 @@ def get_stream_urls_from_tmdb(video_url: str, max_retries: int = 2) -> list:
     def fetch_streams(iframe_url):
         options = webdriver.ChromeOptions()
         options.add_argument("--headless")
+        options.add_argument("--no-sandbox")  # Bypass OS security model
+        options.add_argument("--disable-dev-shm-usage")  # Overcome limited resource issues
+        options.add_argument("--disable-gpu")
+        options.add_argument("--remote-debugging-port=9222")
         found_streams = set()
         driver = None
         try:
