@@ -10,7 +10,6 @@ import os
 from urllib.parse import urlparse, parse_qs, urlunparse
 import random
 from pymongo import MongoClient
-import chromedriver_autoinstaller
 
 app = Flask(__name__)
 
