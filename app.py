@@ -10,15 +10,13 @@ import os
 from urllib.parse import urlparse, parse_qs, urlunparse
 import random
 from pymongo import MongoClient
+from dotenv import load_dotenv 
 
+
+load_dotenv()
+MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017")
 app = Flask(__name__)
-
-
-# Configure MongoDB Atlas connection using the environment variable MONGO_URI
-MONGO_URI = os.environ.get(
-    "MONGO_URI",
-    "mongodb+srv://HassanAli:devil14494%23D@movies-database.mqbrfms.mongodb.net/?retryWrites=true&w=majority&appName=movies-database"
-)
+MONGO_URI = os.environ.get("MONGO_URI", MONGO_URI)
 client = MongoClient(MONGO_URI)
 
 client = MongoClient(MONGO_URI)
@@ -50,7 +48,6 @@ def store_streams_in_db(video_url: str, streams: list):
         "streams": streams,
     }
     print(f"Storing Streams in MONGODB: {document}")
-    # Upsert document using the key
     collection.update_one({"key": key}, {"$set": document}, upsert=True)
 
 def get_stream_urls_from_tmdb(video_url: str, max_retries: int = 2) -> list:
@@ -62,19 +59,12 @@ def get_stream_urls_from_tmdb(video_url: str, max_retries: int = 2) -> list:
 
     def fetch_iframe_url():
         try:
-            # Randomly select a domain from the list
             domains = ["vidsrc.in", "vidsrc.pm", "vidsrc.xyz", "vidsrc.net"]
             chosen_domain = random.choice(domains)
-
-            # Parse the incoming video_url
             parsed = urlparse(video_url)
-            # Replace the network location with the chosen domain
             new_netloc = chosen_domain
-            # Rebuild the URL with the new domain
             main_url = urlunparse((parsed.scheme, new_netloc, parsed.path, parsed.params, parsed.query, parsed.fragment))
-            
             print(f"Fetching main page from randomized domain: {main_url}")
-            # Using ScrapeOps proxy to bypass possible bot protections (optional)
             response = session.get(
                 url='https://proxy.scrapeops.io/v1/',
                 params={
@@ -85,7 +75,6 @@ def get_stream_urls_from_tmdb(video_url: str, max_retries: int = 2) -> list:
             )
             response.raise_for_status()
             soup = BeautifulSoup(response.content, 'html.parser')
-            # Look for the iframe with id "player_iframe"
             iframe = soup.find('iframe', {'id': 'player_iframe'})
             if iframe:
                 iframe_src = iframe.get('src')
@@ -104,10 +93,6 @@ def get_stream_urls_from_tmdb(video_url: str, max_retries: int = 2) -> list:
     def fetch_streams(iframe_url):
         options = webdriver.ChromeOptions()
         options.add_argument("--headless")
-        options.add_argument("--no-sandbox")  # Bypass OS security model
-        options.add_argument("--disable-dev-shm-usage")  # Overcome limited resource issues
-        options.add_argument("--disable-gpu")
-        options.add_argument("--remote-debugging-port=9222")
         found_streams = set()
         driver = None
         try:
@@ -119,7 +104,7 @@ def get_stream_urls_from_tmdb(video_url: str, max_retries: int = 2) -> list:
             actions = ActionChains(driver)
             actions.move_to_element_with_offset(body, 100, 100).click().perform()
             print("Clicked on iframe page, waiting for requests...")
-            time.sleep(20)  # Fixed wait to allow network requests to complete
+            time.sleep(20) 
             for req in driver.requests:
                 if req.response and ".m3u8" in req.url:
                     print(f"Found stream URL: {req.url}")
@@ -162,7 +147,6 @@ def get_streams_api():
 
     try:
         key = extract_key_from_url(video_url)
-        # Check if entry exists in DB
         doc = collection.find_one({"key": key})
         if doc and 'streams' in doc and doc['streams']:
             print(f"Found existing streams in DB for key {key}")
