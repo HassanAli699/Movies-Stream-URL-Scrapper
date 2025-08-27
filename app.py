@@ -15,6 +15,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017")
+PROXY_API_KEY = os.getenv("PROXY_API")
+
 app = Flask(__name__)
 MONGO_URI = os.environ.get("MONGO_URI", MONGO_URI)
 client = MongoClient(MONGO_URI)
@@ -68,7 +70,7 @@ def get_stream_urls_from_tmdb(video_url: str, max_retries: int = 2) -> list:
             response = session.get(
                 url='https://proxy.scrapeops.io/v1/',
                 params={
-                    'api_key': '1554506a-4725-4f50-a37d-6fa8624a4539',
+                    'api_key': PROXY_API_KEY,
                     'url': main_url, 
                 },
                 timeout=60
