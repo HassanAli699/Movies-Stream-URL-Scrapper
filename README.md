@@ -50,8 +50,12 @@ pip install -r requirements.txt
 ```
 
 ### 3. Configure environment variables
-#### Create a .env file in the project root
+
+```bash
+Create a .env file in the project root
 MONGO_URL=YOUR MONGO URI
+PROXY_API= Your ProxyScape API Key
+```
 
 ### 4. Run the server
 ```bash
